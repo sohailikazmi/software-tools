@@ -6,7 +6,7 @@ document.getElementById('generatePdf').addEventListener('click', async () => {
   const borderColor = document.getElementById('borderColor').value;
 
   const preview = document.getElementById('preview');
-  preview.innerHTML = '';
+  preview.innerHTML = 'Testing';
 
   const jsPDF = await import('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js');
   const pdf = new jsPDF.jsPDF();
