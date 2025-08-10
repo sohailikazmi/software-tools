@@ -3,99 +3,98 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Animated PDF Converter</title>
-
-  <style>/* styles.css  <link rel="stylesheet" href="styles.css">*/
-body {
-  font-family: Arial, sans-serif;
-  margin: 20px;
-  text-align: center;
-}
-
-.container {
-  max-width: 600px;
-  margin: auto;
-}
-
-#preview img {
-  margin: 10px;
-  transition: all 0.5s ease;
-}
-
-.fade {
-  opacity: 0;
-  animation: fadeIn 1s forwards;
-}
-
-@keyframes fadeIn {
-  to {
-    opacity: 1;
-  }
-}
-
-.slide {
-  transform: translateX(-50%);
-  animation: slideIn 1s forwards;
-}
-
-@keyframes slideIn {
-  to {
-    transform: translateX(50);
-  }
-}
+  <title>File to PDF Converter</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      padding: 0;
+      background-color: #f4f4f9;
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    label {
+      display: block;
+      margin: 10px 0 5px;
+      font-weight: bold;
+    }
+    input, select, button {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    button {
+      background-color: #007bff;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
   </style>
- 
 </head>
 <body>
+  <h1>File to PDF Converter</h1>
   <div class="container">
-    <h1>Animated PDF Converter</h1>
-    <input type="file" id="imageInput" multiple accept="image/*">
-    <label for="animationLevel">Animation Level:</label>
-    <select id="animationLevel">
-      <option value="none">None</option>
-      <option value="fade">Fade</option>
-      <option value="slide">Slide</option>
-    </select>
+    <label for="fileInput">Select a file:</label>
+    <input type="file" id="fileInput" accept="*/*">
+
     <label for="borderWidth">Border Width (px):</label>
-    <input type="number" id="borderWidth" min="0" value="2">
+    <input type="number" id="borderWidth" min="0" value="1">
+
     <label for="borderColor">Border Color:</label>
     <input type="color" id="borderColor" value="#000000">
-    <button id="generatePdf">Generate Animated PDF</button>
-    <div id="preview"></div>
+
+    <button id="convertBtn">Convert to PDF</button>
   </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
   <script>
-    // script.js
-document.getElementById('generatePdf').addEventListener('click', async () => {
-  const images = document.getElementById('imageInput').files;
-  const animationLevel = document.getElementById('animationLevel').value;
-  const borderWidth = document.getElementById('borderWidth').value;
-  const borderColor = document.getElementById('borderColor').value;
+    document.getElementById('convertBtn').addEventListener('click', async () => {
+      const fileInput = document.getElementById('fileInput');
+      const borderWidth = document.getElementById('borderWidth').value;
+      const borderColor = document.getElementById('borderColor').value;
 
-  const preview = document.getElementById('preview');
-  preview.innerHTML = '';
+      if (!fileInput.files.length) {
+        alert('Please select a file to convert.');
+        return;
+      }
 
-  const jsPDF = await import('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js');
-  const pdf = new jsPDF.jsPDF();
+      const file = fileInput.files[0];
+      const reader = new FileReader();
 
-  Array.from(images).forEach((image, index) => {
-    const img = document.createElement('img');
-    img.src = URL.createObjectURL(image);
-    img.style.border = `${borderWidth}px solid ${borderColor}`;
-    img.className = animationLevel;
-    preview.appendChild(img);
+      reader.onload = function(event) {
+        const content = event.target.result;
 
-    img.onload = () => {
-      const imgWidth = 210; // A4 width in mm
-      const imgHeight = (img.naturalHeight / img.naturalWidth) * imgWidth;
-      if (index > 0) pdf.addPage();
-      pdf.addImage(img, 'JPEG', 0, 0, imgWidth, imgHeight);
-    };
-  });
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF();
 
-  setTimeout(() => {
-    pdf.save('animated.pdf');
-  }, 2000); // Allow animations to complete
-});
+        pdf.setDrawColor(borderColor);
+        pdf.setLineWidth(borderWidth);
+        pdf.rect(10, 10, pdf.internal.pageSize.width - 20, pdf.internal.pageSize.height - 20);
+
+        pdf.text(content.substring(0, 500), 20, 30); // Displaying a portion of the file content
+        pdf.save(`${file.name.split('.')[0]}.pdf`);
+      };
+
+      if (file.type.startsWith('text')) {
+        reader.readAsText(file);
+      } else {
+        alert('Only text-based files are supported for this demo.');
+      }
+    });
   </script>
 </body>
 </html>
